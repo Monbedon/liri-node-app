@@ -2,7 +2,7 @@
   "name": "liri-node-app",
   "version": "1.0.0",
   "description": "",
-  "main": "liri.js",
+  "main": "liri",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
@@ -17,6 +17,8 @@
   },
   "homepage": "https://github.com/Monbedon/liri-node-app#readme",
   "dependencies": {
+    "node-spotify-api": "^1.0.5",
+    "request": "^2.81.0",
     "twitter": "^1.7.1"
   }
 }
