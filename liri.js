@@ -13,7 +13,7 @@ var request = require('request');
 
 var fs = require('fs');
 
-//////////////////////////////////////////////////////
+// //////////////////////////////////////////////////////
 
 
 var twitterKeys= keys.twitterKeys;
@@ -44,16 +44,25 @@ switch(command){
 		break; 
 
 	default:
-		console.log("Not Valid")
+		console.log("Not Valid. Try again!")
 }
 
 function myTweets(){
-	var client = new Twitter(keys);
+
+	var client = new Twitter({
+		consumer_key: twitterKeys.consumer_key,
+		consumer_secret: twitterKeys.consumer_secret,
+		access_token_key: twitterKeys.access_token,
+		access_token_secret: twitterKeys.access_token_secret
+});
 
 
-client.get('statuses/user_timeline', {count: 20, trim_user: false}, 
+client.get('statuses/user_timeline', {count: 20, trim_user: false, exclude_replies: true, include_rts: false}, 
 	function(error, tweets, response) { 
 		if (error) return console.log('Twitter error: ' + error);
+		
+		logCommand();
+
 		for (var i=0; i<tweets.length; i++) {
 			logThis(tweets[i].created_at);
 			logThis(tweets[i].text);
@@ -62,48 +71,140 @@ client.get('statuses/user_timeline', {count: 20, trim_user: false},
 }
 
 
-// // //////////////////////////////////////////
+// // // //////////////////////////////////////////
 
-function mySpotify(){
+function mySpotify(receivedSong){
+
+	var keyword = receivedSong ? receivedSong : 'The Sign Ace of Base';
+	
 	var spotify = new Spotify({
   		client_id: '<668006378bda4d27acad106ac420be9d>',
   		client_secret: '<ba7216a09ba34eb28a09ddc6b1847bdd>'
 	});
 
-spotify.search({ type: 'track', query: 'keyword'|| 'The Sign Ace of Base' }, 
-	function(err, data) {
-  	if (err) {
-    	return console.log('Spotify Error occurred: ' + err);
-  }
+	spotify.search({ type: 'track', query: keyword|| 'The Sign Ace of Base' }, function(err, data) {
+  			if (err) {
+    		return console.log('Spotify Error occurred: ' + err);
+  
  
-  	if (data.tracks.items.length > 0) {
-  		var record = data.tracks.items[0];
- 
-        console.log(' ');
-        console.log('================ Song Info ================');
-        console.log('Artist: ' + record.artists[0].name);
-        console.log('Name: ' + record.name);
-        console.log('Link: ' + record.preview_url);
-        console.log('Album: ' + record.album.name);
-        console.log('===========================================');
-        console.log(' ');
+  			if (data.tracks.items.length === 0) {
+  			(console.log("Song not found!");
 
-        app.logData(data);
-      } else {
-        console.log('No song data found.');
-      }
+  			logCommand();
 
-    });
-  }
-//////////////////////////////////////////////////////
+  			logThis('Artist Name: ' + data.tracks.items[0].artists[0].name);
+			logThis('Song Name: ' + data.tracks.items[0].name);
+			logThis('Preview Link: ' + data.tracks.items[0].preview_url);
+			logThis('Album Title: ' + data.tracks.items[0].album.name);
+			});
 
-// request("http://www.omdbapi.com/?t=&y=&plot=short&?apikey=40e9cece"), function(error, response, body) {
+	}
 
-//   // If the request was successful
-//   if (!error && response.statusCode === 200) {
+// //////////////////////////////////////////////////////
 
-//     // log the body from the site
-//     console.log('body:', body);
-//     console.log('error:', error);
-//   }
-// };
+function movieThis(receivedMovie) {
+
+	
+	var myMovie = receivedMovie ? receivedMovie : 'Mr. Nobody';
+
+	
+	Request("http://www.omdbapi.com/?t=" + myMovie + "&y=&plot=short&r=json&tomatoes=true", function (error, response, body) {
+
+		
+		if (!error && response.statusCode === 200) {
+
+			
+			logCommand();
+
+    		
+    		logThis('Movie Title: ' + JSON.parse(body).Title);
+    		logThis('Release Year: ' + JSON.parse(body).Year);
+    		logThis('IMDB Rating: ' + JSON.parse(body).imdbRating);
+    		logThis('Production Country: ' + JSON.parse(body).Country);
+    		logThis('Language: ' + JSON.parse(body).Language);
+    		logThis('Plot: ' + JSON.parse(body).Plot);
+    		logThis('Actors/Actresses: ' + JSON.parse(body).Actors);
+    		logThis('Rotten Tomatoes Rating: ' + JSON.parse(body).tomatoRating);
+    		logThis('Rotten Tomatoes URL: ' + JSON.parse(body).tomatoURL);
+  		}
+
+  	
+	});
+
+}
+
+//////////////////////////////////////////////
+
+function doWhatItSays() {
+
+	
+	fs.readFile('random.txt', 'utf8', function(error, data) {
+
+	
+	if (error) return console.log('Filesystem Read Error: ' + error);
+
+	var dataObject = data.split(',');
+
+	var myFunction = dataObject[0];
+	var myArgument = dataObject[1];
+
+
+	switch (myFunction) {
+		case 'my-tweets':
+			myFunction = 'myTweets';
+			break;
+		case 'spotify-this-song':
+			myFunction = 'mySpotify';
+			break;
+		case 'movie-this':
+			myFunction = 'movieThis';
+			break;
+		default:
+			console.log('Unexpected error in doWhatItSays function');
+	}
+
+	
+	eval(myFunction)(myArgument);
+
+	});
+
+}
+
+///////////////////////////////////////
+
+function logThis(dataToLog) {
+
+	console.log(logData);
+
+	
+	fs.appendFile('log.txt', logData, function(err) {
+		
+		
+		if (err) return console.log('Error logging file: ' + err);
+	
+	});
+
+
+}
+
+////////////////////////////////////
+function logCommand() {
+
+	
+	if (commandArgument) {
+		var aString = "COMMAND: node liri.js " + command + " '" + commandArgument + "'";
+	} else {
+		var aString = "COMMAND: node liri.js " + command;
+	}
+
+	
+	fs.appendFile('log.txt', aString + '\n', function(err) {
+		
+		
+		if (err) return console.log('Error logging command: ' + err);
+	
+	
+	});
+
+
+}
