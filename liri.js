@@ -88,7 +88,7 @@ function mySpotify(receivedSong){
   
  
   			if (data.tracks.items.length === 0) {
-  			(console.log("Song not found!");
+  			(console.log("Song not found!")) // you had an errant semi-colon here that threw your code
 
   			logCommand();
 
@@ -163,7 +163,7 @@ function doWhatItSays() {
 			console.log('Unexpected error in doWhatItSays function');
 	}
 
-	
+	// make sure to remove dead code
 	eval(myFunction)(myArgument);
 
 	});
